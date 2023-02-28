@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/prophittcorey/matrix.svg)](https://pkg.go.dev/github.com/prophittcorey/matrix)
 
-A simple Matrix client package written in Go.
+A simple Matrix package and command line tool written in Go.
 
 ## Package Usage
 
