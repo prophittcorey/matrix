@@ -11,9 +11,6 @@ import (
 )
 
 var (
-	Username string
-	Password string
-
 	// HTTPClient is used to perform all HTTP requests. You can specify your own
 	// to set a custom timeout, proxy, etc.
 	HTTPClient = http.Client{
@@ -22,30 +19,67 @@ var (
 
 	// UserAgent will be used in each request's user agent header field.
 	UserAgent = "github.com/prophittcorey/matrix"
+
+	// BaseURL is the location to base all API requests from.
+	BaseURL = "https://matrix.org/_matrix/client/r0"
 )
 
-const (
-	baseURL = "https://matrix.org/_matrix/client/r0"
-)
+type Client struct {
+	username string
+	password string
+	token    string
+}
 
-func Send(roomID, message string) error {
-	token, err := AuthToken()
+func (c *Client) Authenticate() error {
+	var data = []byte(fmt.Sprintf(`{"user": "%s", "password": "%s", "type": "m.login.password"}`, Username, Password))
+
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/login", BaseURL), bytes.NewBuffer(data))
 
 	if err != nil {
 		return err
 	}
 
-	var data = []byte(fmt.Sprintf(`{
-		"body": "%s",
-		"msgtype": "m.text"
-	}`, message))
+	req.Header.Set("User-Agent", UserAgent)
+	req.Header.Set("Content-Type", "application/json")
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/rooms/%s/send/m.room.message?access_token=%s", baseURL, url.QueryEscape(roomID), url.QueryEscape(token)), bytes.NewBuffer(data))
+	res, err := HTTPClient.Do(req)
 
 	if err != nil {
 		return err
 	}
 
+	var auth struct {
+		Token string `json:"access_token"`
+	}
+
+	if bs, err := io.ReadAll(res.Body); err == nil {
+		if err := json.Unmarshal(bs, &auth); err == nil {
+			c.token = auth.Token
+			return nil
+		}
+	}
+
+	return fmt.Errorf(`error: failed to unmarshal auth object`)
+}
+
+func (c *Client) Send(roomID, message string) error {
+	if err := c.Authenticate(); err != nil {
+		return err
+	}
+
+	var data = []byte(fmt.Sprintf(`{ "body": "%s", "msgtype": "m.text" }`, message))
+
+	req, err := http.NewRequest(
+		http.MethodPost,
+		fmt.Sprintf("%s/rooms/%s/send/m.room.message", BaseURL, url.QueryEscape(roomID)),
+		bytes.NewBuffer(data),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf(`Bearer %s`, c.token))
 	req.Header.Set("User-Agent", UserAgent)
 	req.Header.Set("Content-Type", "application/json")
 
@@ -56,33 +90,10 @@ func Send(roomID, message string) error {
 	return nil
 }
 
-func AuthToken() (string, error) {
-	var data = []byte(fmt.Sprintf(`{"user": "%s", "password": "%s", "type": "m.login.password"}`, Username, Password))
-
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/login", baseURL), bytes.NewBuffer(data))
-
-	if err != nil {
-		return "", err
+// New creates a new Matrix client for a given user.
+func New(username, password string) *Client {
+	return Client{
+		username: username,
+		password: password,
 	}
-
-	req.Header.Set("User-Agent", UserAgent)
-	req.Header.Set("Content-Type", "application/json")
-
-	res, err := HTTPClient.Do(req)
-
-	if err != nil {
-		return "", err
-	}
-
-	var auth struct {
-		Token string `json:"access_token"`
-	}
-
-	if bs, err := io.ReadAll(res.Body); err == nil {
-		if err := json.Unmarshal(bs, &auth); err == nil {
-			return auth.Token, nil
-		}
-	}
-
-	return "", fmt.Errorf(`error: failed to unmarshal auth object`)
 }
