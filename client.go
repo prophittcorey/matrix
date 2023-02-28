@@ -77,7 +77,7 @@ func (c *Client) Send(roomID, message string) error {
 		return err
 	}
 
-	var data = []byte(fmt.Sprintf(`{ "body": "%s", "msgtype": "m.text" }`, message))
+	var data = []byte(fmt.Sprintf(`{ "msgtype": "m.text", "format": "org.matrix.custom.html", "formatted_body": "%s", "body": "%s" }`, message, message))
 
 	req, err := http.NewRequest(
 		http.MethodPost,
