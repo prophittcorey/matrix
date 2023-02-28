@@ -2,6 +2,9 @@ package main
 
 import (
 	"flag"
+	"log"
+
+	"github.com/prophittcorey/matrix"
 )
 
 func main() {
@@ -24,7 +27,9 @@ func main() {
 		}
 	}
 
-	// TODO: Create a client and send away.
+	client := matrix.New(username, password)
 
-	flag.Usage()
+	if err := client.Send(roomID, message); err != nil {
+		log.Fatal(err)
+	}
 }

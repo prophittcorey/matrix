@@ -35,7 +35,7 @@ func (c *Client) Authenticate() error {
 		return nil /* we already have an auth token */
 	}
 
-	var data = []byte(fmt.Sprintf(`{"user": "%s", "password": "%s", "type": "m.login.password"}`, Username, Password))
+	var data = []byte(fmt.Sprintf(`{"user": "%s", "password": "%s", "type": "m.login.password"}`, c.username, c.password))
 
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/login", BaseURL), bytes.NewBuffer(data))
 
@@ -102,7 +102,7 @@ func (c *Client) Send(roomID, message string) error {
 
 // New creates a new Matrix client for a given user.
 func New(username, password string) *Client {
-	return Client{
+	return &Client{
 		username: username,
 		password: password,
 	}
