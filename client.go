@@ -31,6 +31,10 @@ type Client struct {
 }
 
 func (c *Client) Authenticate() error {
+	if len(c.token) != 0 {
+		return nil /* we already have an auth token */
+	}
+
 	var data = []byte(fmt.Sprintf(`{"user": "%s", "password": "%s", "type": "m.login.password"}`, Username, Password))
 
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/login", BaseURL), bytes.NewBuffer(data))
