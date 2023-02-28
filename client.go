@@ -54,11 +54,17 @@ func (c *Client) Authenticate() error {
 
 	var auth struct {
 		Token string `json:"access_token"`
+		Error string `json:"error"`
 	}
 
 	if bs, err := io.ReadAll(res.Body); err == nil {
 		if err := json.Unmarshal(bs, &auth); err == nil {
+			if len(auth.Error) != 0 {
+				return fmt.Errorf(`error: %s`, auth.Error)
+			}
+
 			c.token = auth.Token
+
 			return nil
 		}
 	}
