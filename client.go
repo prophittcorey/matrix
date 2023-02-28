@@ -35,7 +35,7 @@ func (c *Client) Authenticate() error {
 		return nil /* we already have an auth token */
 	}
 
-	var data = []byte(fmt.Sprintf(`{"user": "%s", "password": "%s", "type": "m.login.password"}`, c.username, c.password))
+	var data = []byte(fmt.Sprintf(`{"device_id": "%s", "user": "%s", "password": "%s", "type": "m.login.password"}`, UserAgent, c.username, c.password))
 
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/login", BaseURL), bytes.NewBuffer(data))
 
