@@ -1,5 +1,7 @@
 # Matrix
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/prophittcorey/matrix.svg)](https://pkg.go.dev/github.com/prophittcorey/matrix)
+
 A simple Matrix client package written in Go.
 
 ## Package Usage
@@ -14,7 +16,7 @@ import (
 )
 
 func main() {
-  message := `Hi, this is an <a href="https://github.com/prophittcorey">html friendly</a> message.`
+  message := `Hi, this is a <a href="https://github.com/prophittcorey">html friendly</a> message.`
 
   client := matrix.New("USERNAME", "PASSWORD")
 
