@@ -93,8 +93,24 @@ func (c *Client) Send(roomID, message string) error {
 	req.Header.Set("User-Agent", UserAgent)
 	req.Header.Set("Content-Type", "application/json")
 
-	if _, err := HTTPClient.Do(req); err != nil {
+	resp, err := HTTPClient.Do(req)
+
+	if err != nil {
 		return err
+	}
+
+	var response struct {
+		Error string `json:"error"`
+	}
+
+	if bs, err := io.ReadAll(resp.Body); err == nil {
+		if err := json.Unmarshal(bs, &response); err == nil {
+			if len(response.Error) != 0 {
+				return fmt.Errorf(`error: %s`, response.Error)
+			}
+
+			return nil
+		}
 	}
 
 	return nil
