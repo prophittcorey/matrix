@@ -77,12 +77,28 @@ func (c *Client) Send(roomID, message string) error {
 		return err
 	}
 
-	var data = []byte(fmt.Sprintf(`{ "msgtype": "m.text", "format": "org.matrix.custom.html", "formatted_body": "%s", "body": "%s" }`, message, message))
+	request := struct {
+		Type          string `json:"msgtype"`
+		Format        string `json:"format"`
+		Body          string `json:"body"`
+		FormattedBody string `json:"formatted_body"`
+	}{
+		Type:          "m.text",
+		Format:        "org.matrix.custom.html",
+		Body:          message,
+		FormattedBody: message,
+	}
+
+	bs, err := json.Marshal(request)
+
+	if err != nil {
+		return err
+	}
 
 	req, err := http.NewRequest(
 		http.MethodPost,
 		fmt.Sprintf("%s/rooms/%s/send/m.room.message", BaseURL, url.QueryEscape(roomID)),
-		bytes.NewBuffer(data),
+		bytes.NewBuffer(bs),
 	)
 
 	if err != nil {
