@@ -12,10 +12,12 @@ func main() {
 	var password string
 	var roomID string
 	var message string
+	var subject string
 
 	flag.StringVar(&username, "username", "", "your username")
 	flag.StringVar(&password, "password", "", "your password")
 	flag.StringVar(&roomID, "roomid", "", "the room id you want to message")
+	flag.StringVar(&subject, "subject", "", "the subject or notification message")
 	flag.StringVar(&message, "message", "", "the message you want to convey")
 
 	flag.Parse()
@@ -29,7 +31,7 @@ func main() {
 
 	client := matrix.New(username, password)
 
-	if err := client.Send(roomID, message); err != nil {
+	if err := client.Send(roomID, subject, message); err != nil {
 		log.Fatal(err)
 	}
 }

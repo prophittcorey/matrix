@@ -72,7 +72,7 @@ func (c *Client) Authenticate() error {
 	return fmt.Errorf(`error: failed to unmarshal auth object`)
 }
 
-func (c *Client) Send(roomID, message string) error {
+func (c *Client) Send(roomID, subject, message string) error {
 	if err := c.Authenticate(); err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (c *Client) Send(roomID, message string) error {
 	}{
 		Type:          "m.text",
 		Format:        "org.matrix.custom.html",
-		Body:          message,
+		Body:          subject,
 		FormattedBody: message,
 	}
 
